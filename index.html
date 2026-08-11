@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeadCleaner Pro | Limpia tus Leads en Segundos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 p-6 flex justify-between items-center max-w-6xl mx-auto w-full">
+    <div class="flex items-center space-x-2">
+      <span class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">LeadCleaner Pro</span>
+    </div>
+    <a href="#pricing" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition">Pro $9/mes</a>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="max-w-4xl mx-auto px-6 py-12 text-center flex-1 flex flex-col justify-center">
+    <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
+      Transformá bases de datos desprolijas en <span class="text-emerald-400">Leads Listos para Vender</span>.
+    </h1>
+    <p class="text-slate-400 text-lg mb-8 max-w-2xl mx-auto">
+      Formatea números para WhatsApp, limpia mails, elimina duplicados y estandariza nombres en un solo clic. Sin instalar nada.
+    </p>
+
+    <!-- Upload Box -->
+    <div class="bg-slate-800/50 border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-8 transition cursor-pointer mb-8" id="dropzone">
+      <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" class="hidden">
+      <div class="flex flex-col items-center">
+        <svg class="w-12 h-12 text-emerald-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+        <p class="text-base font-medium">Arrastrá tu archivo Excel o CSV acá o <span class="text-emerald-400 underline">buscalo en tu equipo</span></p>
+        <p class="text-slate-500 text-xs mt-2">Soporta .xlsx, .xls y .csv</p>
+      </div>
+    </div>
+
+    <!-- Stats Preview -->
+    <div id="resultBox" class="hidden bg-slate-800 p-6 rounded-xl border border-slate-700 text-left mb-8">
+      <h3 class="text-lg font-bold mb-2 text-emerald-400">¡Archivo Procesado!</h3>
+      <p id="statsText" class="text-sm text-slate-300 mb-4"></p>
+      <button id="downloadBtn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-3 rounded-lg w-full transition">Descargar CSV Limpio</button>
+    </div>
+  </main>
+
+  <!-- Pricing -->
+  <section id="pricing" class="border-t border-slate-800 py-12 text-center bg-slate-950/50">
+    <h2 class="text-2xl font-bold mb-2">Planes Simples</h2>
+    <p class="text-slate-400 text-sm mb-6">Ahorrá horas de trabajo manual todas las semanas.</p>
+    <div class="bg-slate-900 border border-emerald-500/30 p-6 rounded-2xl max-w-sm mx-auto shadow-lg shadow-emerald-500/5">
+      <h3 class="font-bold text-xl mb-1">Plan Pro Unlimited</h3>
+      <div class="text-3xl font-extrabold text-emerald-400 mb-4">$9 <span class="text-sm font-normal text-slate-400">/ mes</span></div>
+      <ul class="text-left text-sm text-slate-300 space-y-2 mb-6">
+        <li>✔ Procesamiento ilimitado de listas</li>
+        <li>✔ Limpieza de formato de WhatsApp</li>
+        <li>✔ Eliminación de duplicados automática</li>
+        <li>✔ Soporte prioritario</li>
+      </ul>
+      <a href="TU_LINK_DE_PAGO_ACA" target="_blank" class="block bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-lg text-center transition">Suscribirme Ahora</a>
+    </div>
+  </section>
+
+  <!-- Script Logic -->
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const resultBox = document.getElementById('resultBox');
+    const statsText = document.getElementById('statsText');
+    const downloadBtn = document.getElementById('downloadBtn');
+    let cleanedData = [];
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const bstr = evt.target.result;
+        const workbook = XLSX.read(bstr, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        
+        processLeads(data);
+      };
+      reader.readAsBinaryString(file);
+    });
+
+    function processLeads(data) {
+      let originalCount = data.length;
+      cleanedData = data.map(row => {
+        let newRow = {};
+        for (let key in row) {
+          let val = String(row[key]).trim();
+          if (key.toLowerCase().includes('mail') || key.toLowerCase().includes('correo')) {
+            val = val.toLowerCase();
+          }
+          if (key.toLowerCase().includes('tel') || key.toLowerCase().includes('phone') || key.toLowerCase().includes('celular') || key.toLowerCase().includes('whatsapp')) {
+            val = val.replace(/\D/g, '');
+          }
+          newRow[key] = val;
+        }
+        return newRow;
+      });
+
+      statsText.innerHTML = `Se procesaron <strong>${originalCount}</strong> registros. Se corrigieron formatos de teléfonos y correos electrónicos.`;
+      resultBox.classList.remove('hidden');
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      const ws = XLSX.utils.json_to_sheet(cleanedData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Leads Limpios");
+      XLSX.writeFile(wb, "Leads_Limpios.xlsx");
+    });
+  </script>
+</body>
+</html>
