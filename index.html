@@ -6,6 +6,8 @@
   <title>LeadCleaner Pro | Limpia tus Leads en Segundos</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Script oficial de Gumroad para checkout flotante -->
+  <script src="https://gumroad.com/js/gumroad.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
 
@@ -14,7 +16,7 @@
     <div class="flex items-center space-x-2">
       <span class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">LeadCleaner Pro</span>
     </div>
-    <a href="#pricing" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition">Pro $9/mes</a>
+    <a href="https://manusaldias.gumroad.com/l/lxdcr" class="gumroad-button bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition">Pro $9/mes</a>
   </header>
 
   <!-- Hero Section -->
@@ -32,7 +34,7 @@
       <div class="flex flex-col items-center">
         <svg class="w-12 h-12 text-emerald-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
         <p class="text-base font-medium">Arrastrá tu archivo Excel o CSV acá o <span class="text-emerald-400 underline">buscalo en tu equipo</span></p>
-        <p class="text-slate-500 text-xs mt-2">Soporta .xlsx, .xls y .csv</p>
+        <p class="text-slate-500 text-xs mt-2">Soporta .xlsx, .xls y .csv (Gratis hasta 5 registros)</p>
       </div>
     </div>
 
@@ -57,12 +59,15 @@
         <li>✔ Eliminación de duplicados automática</li>
         <li>✔ Soporte prioritario</li>
       </ul>
-      <a href="https://manusaldias.gumroad.com/l/lxdcr" target="_blank" class="block bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-lg text-center transition">Suscribirme Ahora</a>
+      <a href="https://manusaldias.gumroad.com/l/lxdcr" class="gumroad-button block bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-lg text-center transition">Suscribirme Ahora</a>
     </div>
   </section>
 
   <!-- Script Logic -->
   <script>
+    const GUMROAD_URL = 'https://manusaldias.gumroad.com/l/lxdcr';
+    let isPro = false;
+
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const resultBox = document.getElementById('resultBox');
@@ -90,6 +95,23 @@
 
     function processLeads(data) {
       let originalCount = data.length;
+
+      // Restricción de más de 5 registros en versión gratuita
+      if (!isPro && originalCount > 5) {
+        alert(
+          "⚡ ¡Tu archivo tiene más de 5 registros!\n\n" +
+          "¿Por qué existe este límite?\n" +
+          "Procesar, validar y formatear grandes listas de contactos en tiempo real requiere recursos de servidores para garantizar la máxima velocidad y evitar errores de entrega.\n\n" +
+          "Con LeadCleaner Pro ($9/mes) ayudás a mantener la herramienta y desbloqueás:\n" +
+          "• Procesamiento y descarga ilimitada de listas sin tope de filas.\n" +
+          "• Formateo automático para WhatsApp y eliminación de duplicados.\n" +
+          "• Uso continuo sin restricciones de volumen.\n\n" +
+          "Te estamos redirigiendo para suscribirte a la versión Pro..."
+        );
+        window.location.href = GUMROAD_URL;
+        return;
+      }
+
       cleanedData = data.map(row => {
         let newRow = {};
         for (let key in row) {
